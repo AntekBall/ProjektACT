@@ -199,7 +199,7 @@ strata &variable;
 baseline out=zb_lls_&shortvar loglogs=lls / method=pl;
 run;
 
-/* Plot log-log survival curves with dynamic symbol assignment */
+/* Plot log-log */
 proc gplot data=zb_lls_&shortvar;
 plot lls*YearsAtCompany=&variable;
 %if &n_levels <= 3 %then %do;
@@ -218,7 +218,6 @@ plot lls*YearsAtCompany=&variable;
     symbol8 I=join color=gray line=1 value=none;
 %end;
 %else %do;
-    /* For many groups, use points with different colors */
     symbol1 I=none color=blue pointlabel=("#&variable") value=dot;
 %end;
 run;
@@ -232,7 +231,7 @@ output out=R_Sch_&shortvar
 ressch= RS_&shortvar;
 run;
 
-/* Plot Schoenfeld residuals with just one smoother line */
+/* Plot Schoenfeld residuals */
 goptions reset=all;
 goptions htext=1.5;
 option nodate nonumber;
@@ -269,7 +268,7 @@ run;
 
 
 
-/* budowa modelu ze zmiennymi ktore spelniaja */
+/* building the model form variables that fit the proportional hazards assumption */
 
 
 proc phreg data=dane.Final_data;
@@ -280,7 +279,6 @@ proc phreg data=dane.Final_data;
        	Income_group
        	EnvironmentSatisfaction
        	WorkLifeBalance
-       	Overtime
        	
         / param=ref ref=first;
     
@@ -291,18 +289,6 @@ proc phreg data=dane.Final_data;
        	Income_group
        	EnvironmentSatisfaction
        	WorkLifeBalance
-       	Overtime
         / ties=efron;
-run;
-
-
-proc lifetest data=dane.Final_Data method=lt plots=(s,h);
-time YearsAtCompany*Attrition(0);
-strata YearsInCurrentRole_przedzialy;
-run;
-
-proc lifereg data=dane.Final_data;
-    class YearsInCurrentRole_przedzialy;
-    model YearsAtCompany*Attrition(0) = YearsInCurrentRole_przedzialy / dist=weibull;
 run;
 
